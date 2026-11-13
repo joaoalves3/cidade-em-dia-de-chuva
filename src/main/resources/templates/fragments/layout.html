@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7f9">
+    <title th:text="|${titulo} - Cidade em Dia de Chuva|">Cidade em Dia de Chuva</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+    <script>
+        // aplica o tema salvo antes de desenhar a página (evita piscar)
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem('tema'); } catch (e) { }
+            if (tema !== 'claro' && tema !== 'escuro') {
+                tema = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+            }
+            document.documentElement.dataset.tema = tema;
+        })();
+    </script>
+</head>
+
+<body>
+
+<aside th:fragment="menu(ativo)" class="lateral">
+    <a class="marca" th:href="@{/}">
+        <svg class="marca-icone" viewBox="0 0 32 32" aria-hidden="true">
+            <rect x="11" y="3" width="10" height="26" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M11 9h4M11 14h6M11 19h4M11 24h6" stroke="currentColor" stroke-width="2"/>
+            <path d="M3 21c2.5-2 5-2 7.5 0s5 2 7.5 0 5-2 7.5 0 3.5 1.2 3.5 1.2" fill="none" stroke="#8fb4ff" stroke-width="2.2"/>
+        </svg>
+        <span>Cidade em<br>Dia de Chuva</span>
+    </a>
+
+    <nav class="navegacao" aria-label="Principal">
+        <a th:href="@{/}" th:classappend="${ativo == 'inicio'} ? 'ativo'" th:attr="aria-current=${ativo == 'inicio'} ? 'page' : null">
+            <i aria-hidden="true" class="bi bi-grid-1x2"></i> Visão geral</a>
+        <a th:href="@{/bairros}" th:classappend="${ativo == 'bairros'} ? 'ativo'" th:attr="aria-current=${ativo == 'bairros'} ? 'page' : null">
+            <i aria-hidden="true" class="bi bi-geo-alt"></i> Bairros</a>
+        <a th:href="@{/trechos}" th:classappend="${ativo == 'trechos'} ? 'ativo'" th:attr="aria-current=${ativo == 'trechos'} ? 'page' : null">
+            <i aria-hidden="true" class="bi bi-signpost-split"></i> Trechos</a>
+        <a th:href="@{/leituras}" th:classappend="${ativo == 'leituras'} ? 'ativo'" th:attr="aria-current=${ativo == 'leituras'} ? 'page' : null">
+            <i aria-hidden="true" class="bi bi-water"></i> Leituras</a>
+    </nav>
+
+    <a class="botao botao-lateral" th:href="@{/leituras/novo}">
+        <i aria-hidden="true" class="bi bi-plus-lg"></i> Registrar leitura</a>
+
+    <div class="tema" role="group" aria-label="Tema">
+        <button type="button" data-tema="claro" aria-pressed="false" aria-label="Tema claro" title="Tema claro">
+            <i aria-hidden="true" class="bi bi-sun icone-vazio"></i>
+            <i aria-hidden="true" class="bi bi-sun-fill icone-cheio"></i>
+        </button>
+        <button type="button" data-tema="escuro" aria-pressed="false" aria-label="Tema escuro" title="Tema escuro">
+            <i aria-hidden="true" class="bi bi-moon-stars icone-vazio"></i>
+            <i aria-hidden="true" class="bi bi-moon-stars-fill icone-cheio"></i>
+        </button>
+    </div>
+
+    <div class="limiar">
+        <p class="limiar-titulo">Limiar de alerta: 10 cm</p>
+        <ul>
+            <li><span class="faixa faixa-NORMAL"></span> Normal, abaixo de 5 cm</li>
+            <li><span class="faixa faixa-ATENCAO"></span> Atenção, de 5 a 9 cm</li>
+            <li><span class="faixa faixa-ALERTA"></span> Alerta, 10 cm ou mais</li>
+        </ul>
+    </div>
+</aside>
+
+<div th:fragment="mensagens">
+    <div class="aviso aviso-ok" th:if="${sucesso}" role="status" aria-live="polite">
+        <i aria-hidden="true" class="bi bi-check2-circle"></i>
+        <span th:text="${sucesso}">Salvo</span>
+    </div>
+    <div class="aviso aviso-erro" th:if="${erro}" role="alert">
+        <i aria-hidden="true" class="bi bi-x-octagon"></i>
+        <span th:text="${erro}">Erro</span>
+    </div>
+</div>
+
+<script th:fragment="scripts">
+    // leva o foco ao primeiro campo com erro e marca os campos inválidos para leitores de tela
+    document.querySelectorAll('.tem-erro').forEach(function (campo) {
+        campo.setAttribute('aria-invalid', 'true');
+    });
+    var primeiroErro = document.querySelector('.tem-erro');
+    if (primeiroErro) {
+        primeiroErro.focus();
+    }
+
+    // seletor de tema claro / escuro
+    function aplicarTema(tema) {
+        var html = document.documentElement;
+        html.classList.add('trocando-tema');
+        html.dataset.tema = tema;
+        document.querySelectorAll('.tema button').forEach(function (botao) {
+            botao.setAttribute('aria-pressed', botao.dataset.tema === tema ? 'true' : 'false');
+        });
+        document.querySelector('meta[name="theme-color"]')
+            .setAttribute('content', tema === 'escuro' ? '#0e1116' : '#f6f7f9');
+        setTimeout(function () { html.classList.remove('trocando-tema'); }, 50);
+    }
+    aplicarTema(document.documentElement.dataset.tema || 'claro');
+    document.querySelectorAll('.tema button').forEach(function (botao) {
+        botao.addEventListener('click', function () {
+            aplicarTema(botao.dataset.tema);
+            try { localStorage.setItem('tema', botao.dataset.tema); } catch (e) { }
+        });
+    });
+
+    // filtra as linhas da tabela pelo texto digitado na busca
+    function normalizar(texto) {
+        return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    document.querySelectorAll('[data-filtro]').forEach(function (busca) {
+        var tabela = document.querySelector(busca.dataset.filtro);
+        var semResultado = document.querySelector(busca.dataset.vazio);
+        busca.addEventListener('input', function () {
+            var termo = normalizar(busca.value.trim());
+            var visiveis = 0;
+            tabela.querySelectorAll('tbody tr').forEach(function (linha) {
+                var mostra = normalizar(linha.textContent).includes(termo);
+                linha.hidden = !mostra;
+                if (mostra) visiveis++;
+            });
+            semResultado.hidden = visiveis > 0;
+        });
+    });
+
+    // mostra "Salvando…" enquanto o formulário é enviado
+    document.querySelectorAll('form.form').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            var botao = form.querySelector('button[type="submit"]');
+            botao.setAttribute('aria-busy', 'true');
+            botao.textContent = 'Salvando…';
+        });
+    });
+</script>
+
+</body>
+</html>

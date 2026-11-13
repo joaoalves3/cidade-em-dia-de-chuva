@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Painel do bairro')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('bairros')}"></aside>
+
+    <main class="principal principal-larga" id="conteudo">
+        <a class="voltar" th:href="@{/bairros}"><i aria-hidden="true" class="bi bi-arrow-left"></i> Bairros</a>
+        <header class="topo">
+            <div>
+                <h1 th:text="${painel.bairroNome}">Vila Esperança</h1>
+                <p class="situacao situacao-ALERTA" th:if="${painel.qtdAlerta > 0}"
+                   th:text="${painel.qtdAlerta == 1} ? '1 trecho em alerta neste bairro' : ${painel.qtdAlerta} + ' trechos em alerta neste bairro'">
+                    2 trechos em alerta neste bairro</p>
+                <p class="situacao situacao-ATENCAO" th:if="${painel.qtdAlerta == 0 and painel.qtdAtencao > 0}"
+                   th:text="${painel.qtdAtencao == 1} ? '1 trecho pede atenção neste bairro' : ${painel.qtdAtencao} + ' trechos pedem atenção neste bairro'">
+                    2 trechos pedem atenção</p>
+                <p class="situacao situacao-NORMAL" th:if="${painel.qtdAlerta == 0 and painel.qtdAtencao == 0 and painel.qtdNormal > 0}">
+                    Todos os trechos com leitura estão normais</p>
+                <p th:if="${painel.qtdAlerta == 0 and painel.qtdAtencao == 0 and painel.qtdNormal == 0}">
+                    Nenhum trecho deste bairro tem leitura ainda</p>
+            </div>
+            <a class="botao" th:href="@{/leituras/novo}"><i aria-hidden="true" class="bi bi-plus-lg"></i> Registrar leitura</a>
+        </header>
+
+        <section class="resumo" aria-label="Quantidade de trechos por status">
+            <div class="resumo-barra">
+                <span class="seg seg-ALERTA" th:style="|flex-grow: ${painel.qtdAlerta}|"></span>
+                <span class="seg seg-ATENCAO" th:style="|flex-grow: ${painel.qtdAtencao}|"></span>
+                <span class="seg seg-NORMAL" th:style="|flex-grow: ${painel.qtdNormal}|"></span>
+            </div>
+            <dl class="resumo-numeros">
+                <div class="r-ALERTA"><dt>em alerta</dt><dd th:text="${painel.qtdAlerta}">2</dd></div>
+                <div class="r-ATENCAO"><dt>em atenção</dt><dd th:text="${painel.qtdAtencao}">2</dd></div>
+                <div class="r-NORMAL"><dt>normais</dt><dd th:text="${painel.qtdNormal}">0</dd></div>
+            </dl>
+        </section>
+
+        <div class="vazio" th:if="${#lists.isEmpty(painel.itens)}">
+            <i aria-hidden="true" class="bi bi-signpost-split"></i>
+            <h2>Este bairro ainda não tem trechos</h2>
+            <p>Cadastre as ruas do bairro para acompanhar a lâmina d'água de cada uma.</p>
+            <a class="botao" th:href="@{/trechos/novo}">Cadastrar trecho</a>
+        </div>
+
+        <section class="reguas" th:unless="${#lists.isEmpty(painel.itens)}">
+            <article class="regua" th:each="item : ${painel.itens}"
+                     th:classappend="${item.ultimoStatus != null} ? |regua-${item.ultimoStatus}| : 'regua-sem'">
+                <div class="medidor">
+                    <div class="medidor-escala" aria-hidden="true">
+                        <span style="--marca: 20">20</span>
+                        <span style="--marca: 10">10</span>
+                        <span style="--marca: 5">5</span>
+                        <span style="--marca: 0">0</span>
+                    </div>
+                    <div class="medidor-tubo">
+                        <span class="linha-limiar linha-alerta"></span>
+                        <span class="linha-limiar linha-atencao"></span>
+                        <span class="agua" th:if="${item.ultimaLamina != null}"
+                              th:classappend="|agua-${item.ultimoStatus}|"
+                              th:style="|--lamina: ${item.ultimaLamina}|"></span>
+                    </div>
+                </div>
+                <div class="regua-info">
+                    <p class="regua-valor" th:if="${item.ultimaLamina != null}">
+                        <strong th:text="${item.ultimaLamina}">5</strong> cm
+                    </p>
+                    <p class="regua-valor regua-valor-vazio" th:if="${item.ultimaLamina == null}">Sem leitura</p>
+                    <span th:if="${item.ultimoStatus != null}" class="nivel"
+                          th:classappend="|nivel-${item.ultimoStatus}|" th:text="${item.ultimoStatus}">ATENCAO</span>
+                    <h2 th:text="${item.logradouro}">Rua Alta</h2>
+                    <dl class="regua-detalhe">
+                        <div><dt>Calçada</dt><dd th:text="${item.tipoCalcada}">Regular</dd></div>
+                        <div><dt>Altitude</dt><dd th:text="|${item.altitude} m|">755 m</dd></div>
+                    </dl>
+                </div>
+            </article>
+        </section>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

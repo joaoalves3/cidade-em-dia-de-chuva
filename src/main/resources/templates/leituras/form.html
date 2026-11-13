@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Leitura')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('leituras')}"></aside>
+
+    <main class="principal" id="conteudo">
+        <a class="voltar" th:href="@{/leituras}"><i aria-hidden="true" class="bi bi-arrow-left"></i> Leituras</a>
+        <header class="topo">
+            <h1 th:text="${leitura.id == null} ? 'Nova leitura' : 'Editar leitura'">Nova leitura</h1>
+        </header>
+
+        <div class="form-grade">
+            <form class="form" th:action="@{/leituras/salvar}" th:object="${leitura}" method="post" novalidate>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="campo">
+                    <label for="trechoId">Trecho</label>
+                    <select th:field="*{trechoId}" th:errorclass="tem-erro">
+                        <option value="">Selecione</option>
+                        <option th:each="t : ${trechos}" th:value="${t.id}"
+                                th:text="|${t.logradouro} (${t.bairroNome})|"></option>
+                    </select>
+                    <p class="erro" th:if="${#fields.hasErrors('trechoId')}" th:errors="*{trechoId}"></p>
+                </div>
+
+                <div class="linha">
+                    <div class="campo">
+                        <label for="dataHora">Data e hora da medição</label>
+                        <input type="datetime-local" th:field="*{dataHora}" autocomplete="off" th:errorclass="tem-erro">
+                        <p class="erro" th:if="${#fields.hasErrors('dataHora')}" th:errors="*{dataHora}"></p>
+                    </div>
+                    <div class="campo">
+                        <label for="laminaCm">Lâmina d'água (cm)</label>
+                        <input type="number" inputmode="numeric" th:field="*{laminaCm}" autocomplete="off" placeholder="De 0 a 300" th:errorclass="tem-erro">
+                        <p class="erro" th:if="${#fields.hasErrors('laminaCm')}" th:errors="*{laminaCm}"></p>
+                    </div>
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="botao">Salvar leitura</button>
+                    <a class="botao botao-neutro" th:href="@{/leituras}">Cancelar</a>
+                </div>
+            </form>
+
+            <aside class="nota">
+                <h2>Como o status é definido</h2>
+                <p>Você informa só a lâmina. O sistema compara com o limiar de 10 cm:</p>
+                <ul class="nota-niveis">
+                    <li><span class="nivel nivel-NORMAL">NORMAL</span> abaixo de 5 cm</li>
+                    <li><span class="nivel nivel-ATENCAO">ATENCAO</span> de 5 a 9 cm</li>
+                    <li><span class="nivel nivel-ALERTA">ALERTA</span> 10 cm ou mais</li>
+                </ul>
+                <p>A data não pode estar no futuro e a lâmina vai de 0 a 300 cm.</p>
+            </aside>
+        </div>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

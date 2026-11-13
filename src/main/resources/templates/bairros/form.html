@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bairro')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('bairros')}"></aside>
+
+    <main class="principal" id="conteudo">
+        <a class="voltar" th:href="@{/bairros}"><i aria-hidden="true" class="bi bi-arrow-left"></i> Bairros</a>
+        <header class="topo">
+            <h1 th:text="${bairro.id == null} ? 'Novo bairro' : 'Editar bairro'">Novo bairro</h1>
+        </header>
+
+        <div class="form-grade">
+            <form class="form" th:action="@{/bairros/salvar}" th:object="${bairro}" method="post" novalidate>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="campo">
+                    <label for="nome">Nome do bairro</label>
+                    <input type="text" th:field="*{nome}" autocomplete="off" placeholder="Vila Esperança…" th:errorclass="tem-erro" maxlength="80">
+                    <p class="erro" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></p>
+                </div>
+
+                <div class="linha">
+                    <div class="campo">
+                        <label for="zona">Zona</label>
+                        <select th:field="*{zona}" th:errorclass="tem-erro">
+                            <option value="">Selecione</option>
+                            <option th:each="z : ${zonas}" th:value="${z}" th:text="${z}"></option>
+                        </select>
+                        <p class="erro" th:if="${#fields.hasErrors('zona')}" th:errors="*{zona}"></p>
+                    </div>
+                    <div class="campo">
+                        <label for="areaKm2">Área (km²)</label>
+                        <input type="number" step="0.01" inputmode="decimal" th:field="*{areaKm2}" autocomplete="off" placeholder="2.5" th:errorclass="tem-erro">
+                        <p class="erro" th:if="${#fields.hasErrors('areaKm2')}" th:errors="*{areaKm2}"></p>
+                    </div>
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="botao">Salvar bairro</button>
+                    <a class="botao botao-neutro" th:href="@{/bairros}">Cancelar</a>
+                </div>
+            </form>
+
+            <aside class="nota">
+                <h2>Antes de salvar</h2>
+                <p>A área precisa ser maior que zero. Use ponto para os decimais, como em 2.5.</p>
+                <p>Um bairro só pode ser excluído enquanto não tiver trechos cadastrados.</p>
+            </aside>
+        </div>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

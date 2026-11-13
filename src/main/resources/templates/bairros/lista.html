@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bairros')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('bairros')}"></aside>
+
+    <main class="principal" id="conteudo">
+        <header class="topo">
+            <div>
+                <h1>Bairros</h1>
+                <p th:text="${#lists.size(bairros) == 1} ? '1 bairro monitorado' : ${#lists.size(bairros)} + ' bairros monitorados'">
+                    2 bairros monitorados</p>
+            </div>
+            <a class="botao" th:href="@{/bairros/novo}"><i aria-hidden="true" class="bi bi-plus-lg"></i> Novo bairro</a>
+        </header>
+
+        <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+        <div class="vazio" th:if="${#lists.isEmpty(bairros)}">
+            <i aria-hidden="true" class="bi bi-geo-alt"></i>
+            <h2>Nenhum bairro cadastrado</h2>
+            <p>Comece pelo bairro que você quer monitorar. Depois cadastre os trechos dele.</p>
+            <a class="botao" th:href="@{/bairros/novo}">Cadastrar o primeiro bairro</a>
+        </div>
+
+        <div class="busca" th:unless="${#lists.isEmpty(bairros)}">
+            <i aria-hidden="true" class="bi bi-search"></i>
+            <input type="search" autocomplete="off" placeholder="Buscar bairro ou zona…" aria-label="Buscar bairro"
+                   data-filtro="#tabela-bairros" data-vazio="#sem-bairros">
+        </div>
+
+        <div class="tabela-area" th:unless="${#lists.isEmpty(bairros)}">
+            <table class="tabela" id="tabela-bairros">
+                <thead>
+                <tr>
+                    <th>Bairro</th>
+                    <th>Zona</th>
+                    <th class="num">Área (km²)</th>
+                    <th class="acoes"><span class="sr">Ações</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${bairros}">
+                    <td>
+                        <a class="nome-link" th:href="@{/bairros/{id}/painel(id=${b.id})}" th:text="${b.nome}">Vila Esperança</a>
+                    </td>
+                    <td><span class="zona" th:text="${b.zona}">Leste</span></td>
+                    <td class="num" th:text="${#numbers.formatDecimal(b.areaKm2, 1, 'POINT', 2, 'COMMA')}">3,20</td>
+                    <td class="acoes">
+                        <a class="acao" th:href="@{/bairros/{id}/painel(id=${b.id})}"><i aria-hidden="true" class="bi bi-rulers"></i> Painel</a>
+                        <a class="acao" th:href="@{/bairros/{id}/editar(id=${b.id})}"><i aria-hidden="true" class="bi bi-pencil"></i> Editar</a>
+                        <form th:action="@{/bairros/{id}/excluir(id=${b.id})}" method="post"
+                              onsubmit="return confirm('Excluir este bairro?');">
+                            <button type="submit" class="acao acao-perigo"><i aria-hidden="true" class="bi bi-trash3"></i> Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p class="sem-resultado" id="sem-bairros" hidden>Nada encontrado. Tente outro termo.</p>
+        </div>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

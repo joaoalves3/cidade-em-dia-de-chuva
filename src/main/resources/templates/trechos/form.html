@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Trecho')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('trechos')}"></aside>
+
+    <main class="principal" id="conteudo">
+        <a class="voltar" th:href="@{/trechos}"><i aria-hidden="true" class="bi bi-arrow-left"></i> Trechos</a>
+        <header class="topo">
+            <h1 th:text="${trecho.id == null} ? 'Novo trecho' : 'Editar trecho'">Novo trecho</h1>
+        </header>
+
+        <div class="form-grade">
+            <form class="form" th:action="@{/trechos/salvar}" th:object="${trecho}" method="post" novalidate>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="campo">
+                    <label for="logradouro">Logradouro</label>
+                    <input type="text" th:field="*{logradouro}" autocomplete="off" placeholder="Rua das Palmeiras…" th:errorclass="tem-erro" maxlength="120">
+                    <p class="erro" th:if="${#fields.hasErrors('logradouro')}" th:errors="*{logradouro}"></p>
+                </div>
+
+                <div class="campo">
+                    <label for="bairroId">Bairro</label>
+                    <select th:field="*{bairroId}" th:errorclass="tem-erro">
+                        <option value="">Selecione</option>
+                        <option th:each="b : ${bairros}" th:value="${b.id}" th:text="${b.nome}"></option>
+                    </select>
+                    <p class="erro" th:if="${#fields.hasErrors('bairroId')}" th:errors="*{bairroId}"></p>
+                </div>
+
+                <div class="linha">
+                    <div class="campo">
+                        <label for="tipoCalcada">Tipo de calçada</label>
+                        <select th:field="*{tipoCalcada}" th:errorclass="tem-erro">
+                            <option value="">Selecione</option>
+                            <option th:each="tc : ${tiposCalcada}" th:value="${tc}" th:text="${tc}"></option>
+                        </select>
+                        <p class="erro" th:if="${#fields.hasErrors('tipoCalcada')}" th:errors="*{tipoCalcada}"></p>
+                    </div>
+                    <div class="campo">
+                        <label for="altitude">Altitude (m)</label>
+                        <input type="number" inputmode="numeric" th:field="*{altitude}" autocomplete="off" placeholder="De 0 a 2000" th:errorclass="tem-erro">
+                        <p class="erro" th:if="${#fields.hasErrors('altitude')}" th:errors="*{altitude}"></p>
+                    </div>
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="botao">Salvar trecho</button>
+                    <a class="botao botao-neutro" th:href="@{/trechos}">Cancelar</a>
+                </div>
+            </form>
+
+            <aside class="nota">
+                <h2>Antes de salvar</h2>
+                <p>A altitude vai de 0 a 2000 metros. Trechos mais baixos costumam acumular água primeiro.</p>
+                <p>Excluir um trecho apaga também todas as leituras registradas nele.</p>
+            </aside>
+        </div>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

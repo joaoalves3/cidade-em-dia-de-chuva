@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Trechos')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('trechos')}"></aside>
+
+    <main class="principal" id="conteudo">
+        <header class="topo">
+            <div>
+                <h1>Trechos</h1>
+                <p>Ordenados pelo bairro e, dentro dele, pelo logradouro</p>
+            </div>
+            <a class="botao" th:href="@{/trechos/novo}"><i aria-hidden="true" class="bi bi-plus-lg"></i> Novo trecho</a>
+        </header>
+
+        <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+        <div class="vazio" th:if="${#lists.isEmpty(trechos)}">
+            <i aria-hidden="true" class="bi bi-signpost-split"></i>
+            <h2>Nenhum trecho cadastrado</h2>
+            <p>Trechos são as ruas onde ficam os sensores. Cada um pertence a um bairro.</p>
+            <a class="botao" th:href="@{/trechos/novo}">Cadastrar o primeiro trecho</a>
+        </div>
+
+        <div class="busca" th:unless="${#lists.isEmpty(trechos)}">
+            <i aria-hidden="true" class="bi bi-search"></i>
+            <input type="search" autocomplete="off" placeholder="Buscar logradouro, bairro ou calçada…" aria-label="Buscar trecho"
+                   data-filtro="#tabela-trechos" data-vazio="#sem-trechos">
+        </div>
+
+        <div class="tabela-area" th:unless="${#lists.isEmpty(trechos)}">
+            <table class="tabela" id="tabela-trechos">
+                <thead>
+                <tr>
+                    <th>Logradouro</th>
+                    <th>Bairro</th>
+                    <th>Calçada</th>
+                    <th class="num">Altitude (m)</th>
+                    <th class="acoes"><span class="sr">Ações</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="t : ${trechos}">
+                    <td class="forte" th:text="${t.logradouro}">Rua Alta</td>
+                    <td th:text="${t.bairroNome}">Vila Esperança</td>
+                    <td th:text="${t.tipoCalcada}">Regular</td>
+                    <td class="num" th:text="${t.altitude}">755</td>
+                    <td class="acoes">
+                        <a class="acao" th:href="@{/trechos/{id}/editar(id=${t.id})}"><i aria-hidden="true" class="bi bi-pencil"></i> Editar</a>
+                        <form th:action="@{/trechos/{id}/excluir(id=${t.id})}" method="post"
+                              onsubmit="return confirm('Excluir este trecho? As leituras dele também serão excluídas.');">
+                            <button type="submit" class="acao acao-perigo"><i aria-hidden="true" class="bi bi-trash3"></i> Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p class="sem-resultado" id="sem-trechos" hidden>Nada encontrado. Tente outro termo.</p>
+        </div>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>

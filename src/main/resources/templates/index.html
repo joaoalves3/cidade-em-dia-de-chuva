@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Visão geral')}"></head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: menu('inicio')}"></aside>
+
+    <main class="principal principal-larga" id="conteudo">
+        <section class="faixa-chuva">
+            <div class="faixa-texto">
+                <h1>Onde a água está subindo agora</h1>
+                <p>Cada trecho tem um sensor que mede a lâmina d'água na via. Acompanhe, bairro a bairro,
+                    quais ruas pedem atenção e quais já estão em alerta. Limiar de alerta: 10&nbsp;cm.</p>
+            </div>
+
+            <figure class="ultima" th:unless="${#lists.isEmpty(leituras)}">
+                <div class="medidor">
+                    <div class="medidor-escala" aria-hidden="true">
+                        <span style="--marca: 20">20</span>
+                        <span style="--marca: 10">10</span>
+                        <span style="--marca: 5">5</span>
+                        <span style="--marca: 0">0</span>
+                    </div>
+                    <div class="medidor-tubo">
+                        <span class="linha-limiar linha-alerta"></span>
+                        <span class="linha-limiar linha-atencao"></span>
+                        <span class="agua agua-sobe" th:classappend="|agua-${leituras[0].status}|"
+                              th:style="|--lamina: ${leituras[0].laminaCm}|"></span>
+                    </div>
+                </div>
+                <figcaption>
+                    <span class="ultima-rotulo">Leitura mais recente</span>
+                    <span class="regua-valor"><strong th:text="${leituras[0].laminaCm}">3</strong> cm</span>
+                    <span class="nivel" th:classappend="|nivel-${leituras[0].status}|"
+                          th:text="${leituras[0].status}">NORMAL</span>
+                    <span class="ultima-trecho" th:text="${leituras[0].trechoDescricao}">Av. Beira-Rio (Jardim das Águas)</span>
+                    <span class="ultima-hora"
+                          th:text="${#temporals.format(leituras[0].dataHora, 'dd/MM/yyyy HH:mm')}">13/11/2026 14:40</span>
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="indicadores" aria-label="Indicadores">
+            <div class="indicador">
+                <span class="indicador-rotulo">Bairros monitorados</span>
+                <strong th:text="${#lists.size(bairros)}">2</strong>
+            </div>
+            <div class="indicador">
+                <span class="indicador-rotulo">Leituras registradas</span>
+                <strong th:text="${#lists.size(leituras)}">5</strong>
+            </div>
+            <div class="indicador indicador-ATENCAO">
+                <span class="indicador-rotulo">Leituras em atenção</span>
+                <strong th:text="${#lists.size(leituras.?[status == 'ATENCAO'])}">2</strong>
+            </div>
+            <div class="indicador indicador-ALERTA">
+                <span class="indicador-rotulo">Leituras em alerta</span>
+                <strong th:text="${#lists.size(leituras.?[status == 'ALERTA'])}">2</strong>
+            </div>
+        </section>
+
+        <div class="visao">
+            <section class="bloco">
+                <header class="bloco-topo">
+                    <h2>Últimas leituras</h2>
+                    <a th:href="@{/leituras}" th:unless="${#lists.isEmpty(leituras)}">Ver todas</a>
+                </header>
+
+                <p class="bloco-vazio" th:if="${#lists.isEmpty(leituras)}">
+                    Nenhuma leitura ainda. <a th:href="@{/leituras/novo}">Registre a primeira</a>.
+                </p>
+
+                <ul class="feed" th:unless="${#lists.isEmpty(leituras)}">
+                    <li th:each="l, st : ${leituras}" th:if="${st.index < 6}">
+                        <span class="feed-lamina" th:classappend="|feed-${l.status}|">
+                            <strong th:text="${l.laminaCm}">13</strong> cm
+                        </span>
+                        <span class="feed-texto">
+                            <strong th:text="${l.trechoDescricao}">Rua do Córrego (Vila Esperança)</strong>
+                            <span th:text="${#temporals.format(l.dataHora, 'dd/MM/yyyy HH:mm')}">01/11/2026 17:35</span>
+                        </span>
+                        <span class="nivel" th:classappend="|nivel-${l.status}|" th:text="${l.status}">ALERTA</span>
+                    </li>
+                </ul>
+            </section>
+
+            <div class="visao-lado">
+                <section class="bloco">
+                    <header class="bloco-topo">
+                        <h2>Bairros</h2>
+                        <a th:href="@{/bairros/novo}">Novo bairro</a>
+                    </header>
+
+                    <p class="bloco-vazio" th:if="${#lists.isEmpty(bairros)}">
+                        Nenhum bairro cadastrado. <a th:href="@{/bairros/novo}">Cadastre o primeiro</a>.
+                    </p>
+
+                    <ul class="lista-bairros" th:unless="${#lists.isEmpty(bairros)}">
+                        <li th:each="b : ${bairros}">
+                            <a th:href="@{/bairros/{id}/painel(id=${b.id})}">
+                                <span>
+                                    <strong th:text="${b.nome}">Vila Esperança</strong>
+                                    <span th:text="|Zona ${b.zona}|">Zona Leste</span>
+                                </span>
+                                <span class="lista-bairros-acao">Painel <i aria-hidden="true" class="bi bi-chevron-right"></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+</body>
+</html>
